@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Meet Programs</title>
+<style>
+  :root { --navy: #0c1e4e; --red: #e13a3a; --gray: #9a9a9a; }
+  body { font-family: -apple-system, "Segoe UI", Arial, sans-serif; margin: 0; padding: 24px; color: var(--navy); }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  .sub { margin: 0 0 4px; opacity: 0.85; }
+  .updated { margin: 8px 0 16px; }
+  .card { border: 2px solid var(--navy); border-radius: 4px; overflow: hidden; }
+  .card-header { background: #b7b7b7; padding: 14px 16px; font-weight: 700; color: var(--red); font-size: 1.2rem; }
+  .row { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid #ddd; }
+  .row:last-child { border-bottom: none; }
+  .day { color: var(--red); font-weight: 700; font-size: 1.1rem; }
+  .not-posted { color: var(--gray); }
+  .btns { display: flex; gap: 10px; }
+  .btn {
+    border: 2px solid var(--navy); border-radius: 4px; padding: 8px 16px;
+    color: var(--navy); text-decoration: none; font-weight: 700;
+  }
+  .btn:hover { background: var(--navy); color: #fff; }
+  .footnote { margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<h1 id="meetName">Meet Programs</h1>
+<p class="sub">Programs update automatically every 30 seconds.</p>
+<p class="updated" id="updated"></p>
+
+<div class="card">
+  <div class="card-header">Sessions</div>
+  <div id="sessionRows"></div>
+</div>
+
+<p class="footnote">Sessions are listed in event order. Buttons only appear once a program has been posted.</p>
+
+<script>
+const MANIFEST_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+const FALLBACK_URL = "manifest.json";
+const POLL_MS = 30000;
+
+async function fetchManifest() {
+  try {
+    const url = MANIFEST_URL.startsWith("http") ? MANIFEST_URL : FALLBACK_URL;
+    const res = await fetch(url + (url.includes("?") ? "&" : "?") + "t=" + Date.now(), { cache: "no-store" });
+    const manifest = await res.json();
+    render(manifest);
+  } catch (e) {
+    console.error("Failed to load manifest.json", e);
+  }
+}
+
+function render(manifest) {
+  document.getElementById("meetName").textContent = manifest.meetName + " — Meet Programs";
+
+  const sessions = manifest.sessions || {};
+  const programCount = Object.values(sessions).filter((s) => s.programUrls && s.programUrls.length).length;
+
+  const updated = manifest.updatedAt ? new Date(manifest.updatedAt).toLocaleTimeString() : "—";
+  document.getElementById("updated").textContent = `Updated ${updated} | Programs: ${programCount}`;
+
+  const rowsEl = document.getElementById("sessionRows");
+  rowsEl.innerHTML = "";
+
+  Object.entries(sessions).forEach(([day, info]) => {
+    const row = document.createElement("div");
+    row.className = "row";
+
+    const programs = info.programUrls || [];
+    const right = programs.length
+      ? `<div class="btns">${programs.map(p => `<a class="btn" href="${p.url}" target="_blank" rel="noopener">${p.label}</a>`).join("")}</div>`
+      : `<span class="not-posted">Not posted yet</span>`;
+
+    row.innerHTML = `<span class="day">${day}</span>${right}`;
+    rowsEl.appendChild(row);
+  });
+}
+
+fetchManifest();
+setInterval(fetchManifest, POLL_MS);
+</script>
+</body>
+</html>

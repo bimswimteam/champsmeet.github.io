@@ -1,0 +1,32 @@
+{
+  "meetName": "PVS 2026 Long Course Open Championships",
+  "updatedAt": "2026-07-12T16:03:39.000Z",
+  "prelimLinkCount": 60,
+  "finalLinkCount": 64,
+  "sessions": {
+    "Thursday": { "programUrls": [] },
+    "Friday": { "programUrls": [] },
+    "Saturday": {
+      "programUrls": [
+        { "label": "Senior Prelims", "url": "/programs/saturday-senior-prelims.pdf" },
+        { "label": "Junior Prelims", "url": "/programs/saturday-junior-prelims.pdf" }
+      ]
+    },
+    "Sunday": { "programUrls": [] }
+  },
+  "events": {
+    "12": { "prelimsDay": "Saturday", "finalsDay": "Sunday", "description": "Men 100 Butterfly (Junior)", "timed": false, "prelimsUrl": "#", "finalsUrl": "#" },
+    "35": { "prelimsDay": "Sunday", "finalsDay": "Sunday", "description": "Women 200 Backstroke (Senior)", "timed": false, "prelimsUrl": "#", "finalsUrl": "#" },
+    "36": { "prelimsDay": "Sunday", "finalsDay": "Sunday", "description": "Men 200 Backstroke (Senior)", "timed": false, "prelimsUrl": "#", "finalsUrl": "#" },
+    "37": { "prelimsDay": "Sunday", "finalsDay": "Sunday", "description": "Women 50 Freestyle (Senior)", "timed": false, "prelimsUrl": "#", "finalsUrl": "#" },
+    "38": { "prelimsDay": "Sunday", "finalsDay": "Sunday", "description": "Men 50 Freestyle (Senior)", "timed": false, "prelimsUrl": "#", "finalsUrl": "#" },
+    "39": { "prelimsDay": "Sunday", "finalsDay": "Sunday", "description": "Women 200 Breaststroke (Senior)", "timed": false, "prelimsUrl": "#", "finalsUrl": null },
+    "40": { "prelimsDay": "Sunday", "finalsDay": "Sunday", "description": "Men 200 Breaststroke (Senior)", "timed": false, "prelimsUrl": "#", "finalsUrl": "#" },
+    "43": { "prelimsDay": null, "finalsDay": "Sunday", "description": "Women 1500 Freestyle (Senior)", "timed": true, "prelimsUrl": null, "finalsUrl": "#" },
+    "44": { "prelimsDay": null, "finalsDay": "Sunday", "description": "Men 1500 Freestyle (Senior)", "timed": true, "prelimsUrl": null, "finalsUrl": "#" },
+    "135": { "prelimsDay": "Sunday", "finalsDay": "Sunday", "description": "Women 200 Backstroke (Junior)", "timed": false, "prelimsUrl": "#", "finalsUrl": "#" },
+    "136": { "prelimsDay": "Sunday", "finalsDay": "Sunday", "description": "Men 200 Backstroke (Junior)", "timed": false, "prelimsUrl": "#", "finalsUrl": "#" },
+    "137": { "prelimsDay": "Sunday", "finalsDay": "Sunday", "description": "Women 50 Freestyle (Junior)", "timed": false, "prelimsUrl": "#", "finalsUrl": null },
+    "138": { "prelimsDay": "Sunday", "finalsDay": "Sunday", "description": "Men 50 Freestyle (Junior)", "timed": false, "prelimsUrl": "#", "finalsUrl": "#" }
+  }
+}

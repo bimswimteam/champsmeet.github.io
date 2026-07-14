@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Meet Results</title>
+<style>
+  :root {
+    --navy: #0c1e4e;
+    --red: #e13a3a;
+    --gray: #9a9a9a;
+  }
+  body { font-family: -apple-system, "Segoe UI", Arial, sans-serif; margin: 0; padding: 24px; color: var(--navy); }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  .sub { color: var(--navy); opacity: 0.85; margin: 0 0 4px; }
+  .updated { font-size: 0.9rem; text-align: right; color: var(--navy); }
+  .tabs { display: flex; gap: 8px; margin: 16px 0; flex-wrap: wrap; }
+  .tab {
+    border: 2px solid var(--navy); border-radius: 4px; background: #fff; color: var(--navy);
+    font-weight: 700; padding: 8px 16px; cursor: pointer; font-size: 0.95rem;
+  }
+  .tab.active { background: var(--navy); color: #fff; }
+  table { width: 100%; border-collapse: collapse; border: 2px solid var(--navy); margin-top: 8px; }
+  thead th { background: var(--red); color: #fff; text-align: left; padding: 10px 12px; }
+  th, td { padding: 10px 12px; border-bottom: 1px solid #ddd; }
+  tr:nth-child(even) td { background: #f5f7fb; }
+  .event-num { font-weight: 700; }
+  .btn {
+    display: inline-block; border: 2px solid var(--navy); border-radius: 4px; padding: 6px 14px;
+    color: var(--navy); text-decoration: none; font-weight: 700; font-size: 0.9rem; white-space: nowrap;
+  }
+  .btn:hover { background: var(--navy); color: #fff; }
+  .not-posted { color: var(--gray); }
+  .timed-badge {
+    background: var(--red); color: #fff; font-size: 0.7rem; font-weight: 700;
+    padding: 2px 8px; border-radius: 3px; margin-left: 8px; vertical-align: middle;
+  }
+  .session-header { background: #b7b7b7; padding: 10px 12px; font-weight: 700; color: var(--red); }
+</style>
+</head>
+<body>
+
+<h1 id="meetName">Meet Results</h1>
+<p class="sub">Results update automatically every 30 seconds.</p>
+
+<div class="tabs" id="tabs"></div>
+<div class="updated" id="updated"></div>
+<table>
+  <thead>
+    <tr><th>Event</th><th>Description</th><th>Prelims</th><th>Finals</th></tr>
+  </thead>
+  <tbody id="eventRows"></tbody>
+</table>
+
+<script>
+// Paste your deployed Apps Script Web App URL here (Deploy > New deployment
+// > Web app > Execute as: Me > Who has access: Anyone > Deploy).
+// It looks like: https://script.google.com/macros/s/AKfycb.../exec
+const MANIFEST_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+const FALLBACK_URL = "manifest.json"; // local sample, used only if the line above isn't set up yet
+const POLL_MS = 30000;
+
+let manifest = null;
+let activeDay = null;
+
+async function fetchManifest() {
+  try {
+    const url = MANIFEST_URL.startsWith("http") ? MANIFEST_URL : FALLBACK_URL;
+    const res = await fetch(url + (url.includes("?") ? "&" : "?") + "t=" + Date.now(), { cache: "no-store" });
+    manifest = await res.json();
+    if (!activeDay) {
+      const days = Object.keys(manifest.sessions || {});
+      activeDay = days[days.length - 1] || null;
+    }
+    render();
+  } catch (e) {
+    console.error("Failed to load manifest.json", e);
+  }
+}
+
+function render() {
+  if (!manifest) return;
+
+  document.getElementById("meetName").textContent = manifest.meetName + " — Results";
+
+  const updated = manifest.updatedAt ? new Date(manifest.updatedAt).toLocaleTimeString() : "—";
+  document.getElementById("updated").textContent =
+    `Updated ${updated} | Prelim links: ${manifest.prelimLinkCount || 0} | Finals links: ${manifest.finalLinkCount || 0}`;
+
+  const days = Object.keys(manifest.sessions || {});
+  const tabsEl = document.getElementById("tabs");
+  tabsEl.innerHTML = "";
+  days.forEach((day) => {
+    const btn = document.createElement("button");
+    btn.className = "tab" + (day === activeDay ? " active" : "");
+    btn.textContent = day;
+    btn.onclick = () => { activeDay = day; render(); };
+    tabsEl.appendChild(btn);
+  });
+
+  const rowsEl = document.getElementById("eventRows");
+  rowsEl.innerHTML = "";
+
+  const events = Object.entries(manifest.events || {})
+    .filter(([, ev]) => ev.prelimsDay === activeDay || ev.finalsDay === activeDay)
+    .sort((a, b) => Number(a[0]) - Number(b[0]));
+
+  if (events.length === 0) {
+    rowsEl.innerHTML = `<tr><td colspan="4" class="not-posted">No events posted yet for ${activeDay}.</td></tr>`;
+    return;
+  }
+
+  events.forEach(([num, ev]) => {
+    const showPrelims = ev.prelimsDay === activeDay;
+    const showFinals = ev.finalsDay === activeDay;
+
+    const prelimsCell = !showPrelims
+      ? '<span class="not-posted">—</span>'
+      : ev.prelimsUrl
+        ? `<a class="btn" href="${ev.prelimsUrl}" target="_blank" rel="noopener">Prelims</a>`
+        : '<span class="not-posted">Not posted yet</span>';
+
+    const finalsCell = !showFinals
+      ? '<span class="not-posted">—</span>'
+      : ev.finalsUrl
+        ? `<a class="btn" href="${ev.finalsUrl}" target="_blank" rel="noopener">Finals PDF</a>`
+        : '<span class="not-posted">Not posted yet</span>';
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="event-num">${num}</td>
+      <td>${ev.description || ""}${ev.timed ? '<span class="timed-badge">Timed</span>' : ""}</td>
+      <td>${prelimsCell}</td>
+      <td>${finalsCell}</td>
+    `;
+    rowsEl.appendChild(tr);
+  });
+}
+
+fetchManifest();
+setInterval(fetchManifest, POLL_MS);
+</script>
+</body>
+</html>
